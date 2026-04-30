@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ハングル練習帳</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f0f2f5; margin: 0; overflow: hidden; touch-action: none; }
+        .header { padding: 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .mode-step { font-weight: bold; color: #555; margin-bottom: 5px; }
+        #target-reading { font-size: 24px; color: #ff4757; font-weight: bold; }
+        
+        #canvas-container { position: relative; width: 320px; height: 320px; margin: 20px auto; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        canvas { position: absolute; top: 0; left: 0; z-index: 2; touch-action: none; border-radius: 15px; }
+        #guide-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 200px; color: #eee; z-index: 1; user-select: none; }
+        
+        .controls { display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        button { padding: 12px 20px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .btn-clear { background: #747d8c; color: white; }
+        .btn-mode { background: #1e90ff; color: white; }
+        .btn-next { background: #2ed573; color: white; }
+        button:active { transform: scale(0.95); }
+    </style>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body>
+
+<div class="header">
+    <div id="current-index" class="mode-step">第 1 問 / 24</div>
+    <div id="target-reading">読み: a</div>
+    <div style="margin-top: 10px;">
+        <button class="btn-mode" onclick="toggleMode()" id="mode-btn">テストモードへ</button>
+    </div>
+</div>
+
+<div id="canvas-container">
+    <div id="guide-text">ㅏ</div>
+    <canvas id="drawCanvas"></canvas>
+</div>
+
+<div class="controls">
+    <button class="btn-clear" onclick="clearCanvas()">消去</button>
+    <button class="btn-clear" onclick="showAnswer()" id="answer-btn" style="display:none; background:#ffa502;">正解を見る</button>
+    <button class="btn-next" onclick="nextChar()">次の文字へ</button>
+</div>
+
+<script>
+    const data = [
+        // 基本母音
+        {char: 'ㅏ', read: 'a'}, {char: 'ㅑ', read: 'ya'}, {char: 'ㅓ', read: 'eo'}, {char: 'ㅕ', read: 'yeo'},
+        {char: 'ㅗ', read: 'o'}, {char: 'ㅛ', read: 'yo'}, {char: 'ㅜ', read: 'u'}, {char: 'ㅠ', read: 'yu'},
+        {char: 'ㅡ', read: 'eu'}, {char: 'ㅣ', read: 'i'},
+        // カナダラ
+        {char: '가', read: 'ka'}, {char: '나', read: 'na'}, {char: '다', read: 'ta'}, {char: '라', read: 'ra'},
+        {char: '마', read: 'ma'}, {char: '바', read: 'pa'}, {char: '사', read: 'sa'}, {char: '아', read: 'a'},
+        {char: '자', read: 'cha'}, {char: '차', read: 'cha'}, {char: '카', read: 'ka'}, {char: '타', read: 'ta'},
+        {char: '파', read: 'pa'}, {char: '하', read: 'ha'}
+    ];
+
+    let currentIndex = 0;
+    let isTestMode = false;
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    const guide = document.getElementById('guide-text');
+    
+    // キャンバス設定
+    function setupCanvas() {
+        canvas.width = 320;
+        canvas.height = 320;
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#2f3542';
+    }
+
+    // 描画機能
+    let drawing = false;
+    function start(e) { drawing = true; draw(e); }
+    function end() { drawing = false; ctx.beginPath(); }
+    function draw(e) {
+        if (!drawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+
+    canvas.addEventListener('touchstart', start);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', end);
+
+    function updateDisplay() {
+        const item = data[currentIndex];
+        document.getElementById('current-index').innerText = `第 ${currentIndex + 1} 問 / ${data.length}`;
+        document.getElementById('target-reading').innerText = `読み: ${item.read}`;
+        guide.innerText = item.char;
+        guide.style.display = isTestMode ? 'none' : 'block';
+        document.getElementById('answer-btn').style.display = isTestMode ? 'inline-block' : 'none';
+        clearCanvas();
+    }
+
+    function toggleMode() {
+        isTestMode = !isTestMode;
+        document.getElementById('mode-btn').innerText = isTestMode ? '練習モードへ' : 'テストモードへ';
+        updateDisplay();
+    }
+
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    
+    function showAnswer() { guide.style.display = 'block'; }
+
+    function nextChar() {
+        currentIndex = (currentIndex + 1) % data.length;
+        updateDisplay();
+    }
+
+    setupCanvas();
+    updateDisplay();
+</script>
+</body>
+</html>
