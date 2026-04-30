@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ハングル子音練習</title>
+    <title>ハングル総合練習帳</title>
     <style>
         body { font-family: sans-serif; text-align: center; background: #f0f2f5; margin: 0; overflow: hidden; touch-action: none; }
         .header { padding: 15px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
@@ -12,7 +12,7 @@
         .btn-reset { position: absolute; top: 10px; right: 10px; padding: 5px 10px; font-size: 12px; background: #dfe4ea; color: #57606f; border: none; border-radius: 5px; }
         #canvas-container { position: relative; width: 320px; height: 320px; margin: 15px auto; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         canvas { position: absolute; top: 0; left: 0; z-index: 2; touch-action: none; border-radius: 15px; }
-        #guide-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 180px; color: #eee; z-index: 1; user-select: none; }
+        #guide-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 180px; color: #eee; z-index: 1; user-select: none; white-space: nowrap; }
         .controls { display: flex; justify-content: center; gap: 10px; margin-top: 5px; flex-wrap: wrap; }
         button { padding: 12px 20px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .btn-clear { background: #747d8c; color: white; }
@@ -26,26 +26,40 @@
 
 <div class="header">
     <button class="btn-reset" onclick="resetToFirst()">最初から</button>
-    <div id="current-index" class="mode-step">子音 1 / 14</div>
-    <div id="target-reading">読み: k (g)</div>
+    <div id="current-index" class="mode-step">第 1 問 / 48</div>
+    <div id="target-reading">読み: a</div>
     <div style="margin-top: 5px;">
         <button class="btn-mode" onclick="toggleMode()" id="mode-btn">テストモードへ</button>
     </div>
 </div>
 
 <div id="canvas-container">
-    <div id="guide-text">ㄱ</div>
+    <div id="guide-text">ㅏ</div>
     <canvas id="drawCanvas"></canvas>
 </div>
 
 <div class="controls">
     <button class="btn-clear" onclick="clearCanvas()">消去</button>
     <button class="btn-clear" onclick="showAnswer()" id="answer-btn" style="display:none; background:#ffa502;">正解を見る</button>
-    <button class="btn-next" onclick="nextChar()">次の子音へ</button>
+    <button class="btn-next" onclick="nextChar()">次の文字へ</button>
 </div>
 
 <script>
     const data = [
+        // 1. 基本母音（10個）
+        {char: 'ㅏ', read: 'a'}, {char: 'ㅑ', read: 'ya'}, {char: 'ㅓ', read: 'eo'}, {char: 'ㅕ', read: 'yeo'},
+        {char: 'ㅗ', read: 'o'}, {char: 'ㅛ', read: 'yo'}, {char: 'ㅜ', read: 'u'}, {char: 'ㅠ', read: 'yu'},
+        {char: 'ㅡ', read: 'eu'}, {char: 'ㅣ', read: 'i'},
+        // 2. 母音の文字（10個）
+        {char: '아', read: 'a'}, {char: '야', read: 'ya'}, {char: '어', read: 'eo'}, {char: '여', read: 'yeo'},
+        {char: '오', read: 'o'}, {char: '요', read: 'yo'}, {char: 'う', read: 'u'}, {char: '유', read: 'yu'},
+        {char: '으', read: 'eu'}, {char: '이', read: 'i'},
+        // 3. カナダラ（14個）
+        {char: '가', read: 'ka'}, {char: '나', read: 'na'}, {char: '다', read: 'ta'}, {char: '라', read: 'ra'},
+        {char: '마', read: 'ma'}, {char: '바', read: 'pa'}, {char: '사', read: 'sa'}, {char: '아', read: 'a'},
+        {char: '자', read: 'cha'}, {char: '차', read: 'cha'}, {char: '카', read: 'ka'}, {char: '타', read: 'ta'},
+        {char: '파', read: 'pa'}, {char: '하', read: 'ha'},
+        // 4. 基本子音単体（14個）
         {char: 'ㄱ', read: 'k (g)'}, {char: 'ㄴ', read: 'n'}, {char: 'ㄷ', read: 't (d)'}, 
         {char: 'ㄹ', read: 'r (l)'}, {char: 'ㅁ', read: 'm'}, {char: 'ㅂ', read: 'p (b)'}, 
         {char: 'ㅅ', read: 's'}, {char: 'ㅇ', read: 'ng (無音)'}, {char: 'ㅈ', read: 'ch (j)'}, 
@@ -62,7 +76,7 @@
     function setupCanvas() {
         canvas.width = 320;
         canvas.height = 320;
-        ctx.lineWidth = 12; // 子音はパーツがシンプルなので少し太めに設定
+        ctx.lineWidth = 10;
         ctx.lineCap = 'round';
         ctx.strokeStyle = '#2f3542';
     }
@@ -89,7 +103,7 @@
 
     function updateDisplay() {
         const item = data[currentIndex];
-        document.getElementById('current-index').innerText = `子音 ${currentIndex + 1} / ${data.length}`;
+        document.getElementById('current-index').innerText = `第 ${currentIndex + 1} 問 / ${data.length}`;
         document.getElementById('target-reading').innerText = `読み: ${item.read}`;
         guide.innerText = item.char;
         guide.style.display = isTestMode ? 'none' : 'block';
@@ -110,7 +124,7 @@
         updateDisplay();
     }
     function resetToFirst() {
-        if(confirm("最初（ㄱ）に戻りますか？")) {
+        if(confirm("最初の文字（母音のㅏ）に戻りますか？")) {
             currentIndex = 0;
             updateDisplay();
         }
