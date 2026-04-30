@@ -111,4 +111,23 @@
     }
 
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-    function showAnswer() { guide.style.display = 'block
+    function showAnswer() { guide.style.display = 'block'; }
+
+    function nextChar() {
+        currentIndex = (currentIndex + 1) % data.length;
+        updateDisplay();
+    }
+
+    // 追加したリセット機能
+    function resetToFirst() {
+        if(confirm("最初の文字（母音のㅏ）に戻りますか？")) {
+            currentIndex = 0;
+            updateDisplay();
+        }
+    }
+
+    setupCanvas();
+    updateDisplay();
+</script>
+</body>
+</html>
