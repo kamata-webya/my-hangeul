@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ハングル総合練習帳</title>
+    <title>ハングル単語練習帳</title>
     <style>
         body { font-family: sans-serif; text-align: center; background: #f0f2f5; margin: 0; overflow: hidden; touch-action: none; }
         .header { padding: 15px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
         .mode-step { font-weight: bold; color: #555; font-size: 14px; }
-        #target-reading { font-size: 26px; color: #ff4757; font-weight: bold; margin: 5px 0; }
+        #target-reading { font-size: 24px; color: #ff4757; font-weight: bold; margin: 5px 0; min-height: 1.2em; }
         .btn-reset { position: absolute; top: 10px; right: 10px; padding: 5px 10px; font-size: 12px; background: #dfe4ea; color: #57606f; border: none; border-radius: 5px; }
         #canvas-container { position: relative; width: 320px; height: 320px; margin: 15px auto; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         canvas { position: absolute; top: 0; left: 0; z-index: 2; touch-action: none; border-radius: 15px; }
-        #guide-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 180px; color: #eee; z-index: 1; user-select: none; white-space: nowrap; }
+        #guide-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 120px; color: #eee; z-index: 1; user-select: none; white-space: nowrap; letter-spacing: -5px; }
         .controls { display: flex; justify-content: center; gap: 10px; margin-top: 5px; flex-wrap: wrap; }
         button { padding: 12px 20px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .btn-clear { background: #747d8c; color: white; }
@@ -26,7 +26,7 @@
 
 <div class="header">
     <button class="btn-reset" onclick="resetToFirst()">最初から</button>
-    <div id="current-index" class="mode-step">第 1 問 / 48</div>
+    <div id="current-index" class="mode-step">第 1 問 / 60</div>
     <div id="target-reading">読み: a</div>
     <div style="margin-top: 5px;">
         <button class="btn-mode" onclick="toggleMode()" id="mode-btn">テストモードへ</button>
@@ -46,25 +46,30 @@
 
 <script>
     const data = [
-        // 1. 基本母音（10個）
+        // 1. 母音(10)
         {char: 'ㅏ', read: 'a'}, {char: 'ㅑ', read: 'ya'}, {char: 'ㅓ', read: 'eo'}, {char: 'ㅕ', read: 'yeo'},
         {char: 'ㅗ', read: 'o'}, {char: 'ㅛ', read: 'yo'}, {char: 'ㅜ', read: 'u'}, {char: 'ㅠ', read: 'yu'},
         {char: 'ㅡ', read: 'eu'}, {char: 'ㅣ', read: 'i'},
-        // 2. 母音の文字（10個） - 修正済み
+        // 2. 母音文字(10)
         {char: '아', read: 'a'}, {char: '야', read: 'ya'}, {char: '어', read: 'eo'}, {char: '여', read: 'yeo'},
         {char: '오', read: 'o'}, {char: '요', read: 'yo'}, {char: '우', read: 'u'}, {char: '유', read: 'yu'},
         {char: '으', read: 'eu'}, {char: '이', read: 'i'},
-        // 3. カナダラ（14個）
-        {char: '가', read: 'ka'}, {char: '나', read: 'na'}, {char: '다', read: 'ta'}, {char: 'ラ', read: 'ra'},
+        // 3. カナダラ(14)
+        {char: '가', read: 'ka'}, {char: '나', read: 'na'}, {char: '다', read: 'ta'}, {char: '라', read: 'ra'},
         {char: '마', read: 'ma'}, {char: '바', read: 'pa'}, {char: '사', read: 'sa'}, {char: '아', read: 'a'},
         {char: '자', read: 'cha'}, {char: '차', read: 'cha'}, {char: '카', read: 'ka'}, {char: '타', read: 'ta'},
         {char: '파', read: 'pa'}, {char: '하', read: 'ha'},
-        // 4. 基本子音単体（14個）
+        // 4. 基本子音単体(14)
         {char: 'ㄱ', read: 'k (g)'}, {char: 'ㄴ', read: 'n'}, {char: 'ㄷ', read: 't (d)'}, 
         {char: 'ㄹ', read: 'r (l)'}, {char: 'ㅁ', read: 'm'}, {char: 'ㅂ', read: 'p (b)'}, 
         {char: 'ㅅ', read: 's'}, {char: 'ㅇ', read: 'ng (無音)'}, {char: 'ㅈ', read: 'ch (j)'}, 
         {char: 'ㅊ', read: 'ch (激音)'}, {char: 'ㅋ', read: 'k (激音)'}, {char: 'ㅌ', read: 't (激音)'}, 
-        {char: 'ㅍ', read: 'p (激音)'}, {char: 'ㅎ', read: 'h'}
+        {char: 'ㅍ', read: 'p (激音)'}, {char: 'ㅎ', read: 'h'},
+        // 5. 基本単語(12) - 今回追加
+        {char: '아이', read: 'ai (子供)'}, {char: '우유', read: 'u-yu (牛乳)'}, {char: '오이', read: 'o-i (きゅうり)'},
+        {char: '나', read: 'na (私)'}, {char: '너', read: 'neo (あなた)'}, {char: '고기', read: 'ko-gi (肉)'},
+        {char: '구두', read: 'ku-du (靴)'}, {char: '나라', read: 'na-ra (国)'}, {char: '나무', read: 'na-mu (木)'},
+        {char: '머리', read: 'meo-ri (頭)'}, {char: '다리', read: 'ta-ri (足/橋)'}, {char: '아버지', read: 'a-beo-ji (お父さん)'}
     ];
 
     let currentIndex = 0;
@@ -105,6 +110,16 @@
         const item = data[currentIndex];
         document.getElementById('current-index').innerText = `第 ${currentIndex + 1} 問 / ${data.length}`;
         document.getElementById('target-reading').innerText = `読み: ${item.read}`;
+        
+        // 文字数に合わせてフォントサイズを調整
+        if (item.char.length >= 3) {
+            guide.style.fontSize = '100px';
+        } else if (item.char.length === 2) {
+            guide.style.fontSize = '140px';
+        } else {
+            guide.style.fontSize = '180px';
+        }
+        
         guide.innerText = item.char;
         guide.style.display = isTestMode ? 'none' : 'block';
         document.getElementById('answer-btn').style.display = isTestMode ? 'inline-block' : 'none';
@@ -124,7 +139,7 @@
         updateDisplay();
     }
     function resetToFirst() {
-        if(confirm("最初の文字（母音のㅏ）に戻りますか？")) {
+        if(confirm("最初（母音のㅏ）に戻りますか？")) {
             currentIndex = 0;
             updateDisplay();
         }
